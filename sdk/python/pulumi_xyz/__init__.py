@@ -6,7 +6,7 @@ from . import _utilities
 import typing
 # Export this package's modules as members:
 from .provider import *
-from .random import *
+from .random_login import *
 _utilities.register(
     resource_modules="""
 [
@@ -15,7 +15,7 @@ _utilities.register(
   "mod": "index",
   "fqn": "pulumi_xyz",
   "classes": {
-   "xyz:index:Random": "Random"
+   "xyz:index:RandomLogin": "RandomLogin"
   }
  }
 ]

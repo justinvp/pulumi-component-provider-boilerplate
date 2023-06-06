@@ -15,11 +15,10 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 // Version is initialized by the Go linker to contain the semver of this build.
@@ -30,57 +29,61 @@ func main() {
 		// We tell the provider what resources it needs to support.
 		// In this case, a single custom resource.
 		infer.Provider(infer.Options{
-			Resources: []infer.InferredResource{
-				infer.Resource[Random, RandomArgs, RandomState](),
+			Components: []infer.InferredComponent{
+				infer.Component[*RandomLogin, RandomLoginArgs, *RandomLoginOutput](),
 			},
 		}))
 }
 
-// Each resource has a controlling struct.
-// Resource behavior is determined by implementing methods on the controlling struct.
-// The `Create` method is mandatory, but other methods are optional.
-// - Check: Remap inputs before they are typed.
-// - Diff: Change how instances of a resource are compared.
-// - Update: Mutate a resource in place.
-// - Read: Get the state of a resource from the backing provider.
-// - Delete: Custom logic when the resource is deleted.
-// - Annotate: Describe fields and set defaults for a resource.
-// - WireDependencies: Control how outputs and secrets flows through values.
-type Random struct{}
-
-// Each resource has in input struct, defining what arguments it accepts.
-type RandomArgs struct {
-	// Fields projected into Pulumi must be public and hava a `pulumi:"..."` tag.
-	// The pulumi tag doesn't need to match the field name, but its generally a
-	// good idea.
-	Length int `pulumi:"length"`
-}
-
-// Each resource has a state, describing the fields that exist on the created resource.
-type RandomState struct {
-	// It is generally a good idea to embed args in outputs, but it isn't strictly necessary.
-	RandomArgs
-	// Here we define a required output called result.
-	Result string `pulumi:"result"`
-}
-
-// All resources must implement Create at a minumum.
-func (Random) Create(ctx p.Context, name string, input RandomArgs, preview bool) (string, RandomState, error) {
-	state := RandomState{RandomArgs: input}
-	if preview {
-		return name, state, nil
+type (
+	RandomLogin     struct{}
+	RandomLoginArgs struct {
+		PasswordLength pulumi.IntPtrInput `pulumi:"passwordLength"`
+		PetName        bool               `pulumi:"petName"`
 	}
-	state.Result = makeRandom(input.Length)
-	return name, state, nil
+)
+
+type RandomLoginOutput struct {
+	pulumi.ResourceState
+	PasswordLength pulumi.IntPtrInput `pulumi:"passwordLength"`
+	PetName        bool               `pulumi:"petName"`
+	// Outputs
+	Username pulumi.StringOutput `pulumi:"username"`
+	Password pulumi.StringOutput `pulumi:"password"`
 }
 
-func makeRandom(length int) string {
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	charset := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-	result := make([]rune, length)
-	for i := range result {
-		result[i] = charset[seededRand.Intn(len(charset))]
+func (r *RandomLogin) Construct(ctx *pulumi.Context, name, typ string, args RandomLoginArgs, opts pulumi.ResourceOption) (*RandomLoginOutput, error) {
+	comp := &RandomLoginOutput{}
+	err := ctx.RegisterComponentResource(typ, name, comp, opts)
+	if err != nil {
+		return nil, err
 	}
-	return string(result)
+	if args.PetName {
+		pet, err := random.NewRandomPet(ctx, name+"-pet", &random.RandomPetArgs{}, pulumi.Parent(comp))
+		if err != nil {
+			return nil, err
+		}
+		comp.Username = pet.ID().ToStringOutput()
+	} else {
+		id, err := random.NewRandomId(ctx, name+"-id", &random.RandomIdArgs{
+			ByteLength: pulumi.Int(8),
+		}, pulumi.Parent(comp))
+		if err != nil {
+			return nil, err
+		}
+		comp.Username = id.ID().ToStringOutput()
+	}
+	var length pulumi.IntInput = pulumi.Int(16)
+	if args.PasswordLength != nil {
+		length = args.PasswordLength.ToIntPtrOutput().Elem()
+	}
+	password, err := random.NewRandomPassword(ctx, name+"-password", &random.RandomPasswordArgs{
+		Length: length,
+	}, pulumi.Parent(comp))
+	if err != nil {
+		return nil, err
+	}
+	comp.Password = password.Result
+
+	return comp, nil
 }
