@@ -20,8 +20,6 @@ export class RandomLogin extends pulumi.ComponentResource {
     }
 
     public /*out*/ readonly password!: pulumi.Output<string>;
-    public readonly passwordLength!: pulumi.Output<number>;
-    public readonly petName!: pulumi.Output<boolean>;
     public /*out*/ readonly username!: pulumi.Output<string>;
 
     /**
@@ -47,8 +45,6 @@ export class RandomLogin extends pulumi.ComponentResource {
             resourceInputs["username"] = undefined /*out*/;
         } else {
             resourceInputs["password"] = undefined /*out*/;
-            resourceInputs["passwordLength"] = undefined /*out*/;
-            resourceInputs["petName"] = undefined /*out*/;
             resourceInputs["username"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);

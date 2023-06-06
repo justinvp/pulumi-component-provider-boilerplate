@@ -111,16 +111,6 @@ class RandomLogin(pulumi.ComponentResource):
         return pulumi.get(self, "password")
 
     @property
-    @pulumi.getter(name="passwordLength")
-    def password_length(self) -> pulumi.Output[int]:
-        return pulumi.get(self, "password_length")
-
-    @property
-    @pulumi.getter(name="petName")
-    def pet_name(self) -> pulumi.Output[bool]:
-        return pulumi.get(self, "pet_name")
-
-    @property
     @pulumi.getter
     def username(self) -> pulumi.Output[str]:
         return pulumi.get(self, "username")

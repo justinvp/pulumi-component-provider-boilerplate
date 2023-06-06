@@ -15,12 +15,6 @@ namespace Pulumi.Xyz
         [Output("password")]
         public Output<string> Password { get; private set; } = null!;
 
-        [Output("passwordLength")]
-        public Output<int> PasswordLength { get; private set; } = null!;
-
-        [Output("petName")]
-        public Output<bool> PetName { get; private set; } = null!;
-
         [Output("username")]
         public Output<string> Username { get; private set; } = null!;
 

@@ -14,10 +14,8 @@ import (
 type RandomLogin struct {
 	pulumi.ResourceState
 
-	Password       pulumi.StringOutput `pulumi:"password"`
-	PasswordLength pulumi.IntOutput    `pulumi:"passwordLength"`
-	PetName        pulumi.BoolOutput   `pulumi:"petName"`
-	Username       pulumi.StringOutput `pulumi:"username"`
+	Password pulumi.StringOutput `pulumi:"password"`
+	Username pulumi.StringOutput `pulumi:"username"`
 }
 
 // NewRandomLogin registers a new resource with the given unique name, arguments, and options.
@@ -91,14 +89,6 @@ func (o RandomLoginOutput) ToRandomLoginOutputWithContext(ctx context.Context) R
 
 func (o RandomLoginOutput) Password() pulumi.StringOutput {
 	return o.ApplyT(func(v *RandomLogin) pulumi.StringOutput { return v.Password }).(pulumi.StringOutput)
-}
-
-func (o RandomLoginOutput) PasswordLength() pulumi.IntOutput {
-	return o.ApplyT(func(v *RandomLogin) pulumi.IntOutput { return v.PasswordLength }).(pulumi.IntOutput)
-}
-
-func (o RandomLoginOutput) PetName() pulumi.BoolOutput {
-	return o.ApplyT(func(v *RandomLogin) pulumi.BoolOutput { return v.PetName }).(pulumi.BoolOutput)
 }
 
 func (o RandomLoginOutput) Username() pulumi.StringOutput {

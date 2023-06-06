@@ -30,30 +30,26 @@ func main() {
 		// In this case, a single custom resource.
 		infer.Provider(infer.Options{
 			Components: []infer.InferredComponent{
-				infer.Component[*RandomLogin, RandomLoginArgs, *RandomLoginOutput](),
+				infer.Component[*RandomLogin, RandomLoginArgs, *RandomLoginState](),
 			},
 		}))
 }
 
-type (
-	RandomLogin     struct{}
-	RandomLoginArgs struct {
-		PasswordLength pulumi.IntPtrInput `pulumi:"passwordLength"`
-		PetName        bool               `pulumi:"petName"`
-	}
-)
+type RandomLogin struct{}
 
-type RandomLoginOutput struct {
-	pulumi.ResourceState
+type RandomLoginArgs struct {
 	PasswordLength pulumi.IntPtrInput `pulumi:"passwordLength"`
 	PetName        bool               `pulumi:"petName"`
-	// Outputs
+}
+
+type RandomLoginState struct {
+	pulumi.ResourceState
 	Username pulumi.StringOutput `pulumi:"username"`
 	Password pulumi.StringOutput `pulumi:"password"`
 }
 
-func (r *RandomLogin) Construct(ctx *pulumi.Context, name, typ string, args RandomLoginArgs, opts pulumi.ResourceOption) (*RandomLoginOutput, error) {
-	comp := &RandomLoginOutput{}
+func (r *RandomLogin) Construct(ctx *pulumi.Context, name, typ string, args RandomLoginArgs, opts pulumi.ResourceOption) (*RandomLoginState, error) {
+	comp := &RandomLoginState{}
 	err := ctx.RegisterComponentResource(typ, name, comp, opts)
 	if err != nil {
 		return nil, err
